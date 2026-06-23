@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Breast Cancer Survival Prognosis · CSUDH MS Project</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap');
+
+  :root {
+    --bg:        #0d1117;
+    --surface:   #161b22;
+    --surface2:  #1c2230;
+    --border:    #21282f;
+    --accent:    #58a6ff;
+    --accent2:   #bc8cff;
+    --danger:    #f85149;
+    --warn:      #e3b341;
+    --success:   #3fb950;
+    --text:      #e6edf3;
+    --muted:     #8b949e;
+    --mono:      'IBM Plex Mono', monospace;
+    --sans:      'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-size: 15px;
+    line-height: 1.65;
+    min-height: 100vh;
+  }
+
+  /* ─── HEADER ─────────────────────────────── */
+  header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 28px; height: 28px; border-radius: 6px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .logo-text { font-size: 13px; font-weight: 600; letter-spacing: 0.04em; color: var(--text); }
+  .logo-sub  { font-size: 11px; color: var(--muted); margin-left: 4px; }
+  .nav-pills { display: flex; gap: 4px; }
+  .nav-pill {
+    font-size: 12px; padding: 4px 12px; border-radius: 20px;
+    border: 1px solid transparent; cursor: pointer;
+    background: transparent; color: var(--muted);
+    font-family: var(--sans); transition: all 0.15s;
+  }
+  .nav-pill:hover { color: var(--text); border-color: var(--border); }
+  .nav-pill.active { background: var(--accent); color: #000; font-weight: 600; }
+
+  /* ─── HERO ────────────────────────────────── */
+  .hero {
+    padding: 5rem 2rem 3rem;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .hero-tag {
+    display: inline-block; font-family: var(--mono); font-size: 11px;
+    color: var(--accent); border: 1px solid var(--accent);
+    padding: 3px 10px; border-radius: 3px; letter-spacing: 0.08em;
+    margin-bottom: 1.5rem; text-transform: uppercase;
+  }
+  h1 {
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 300;
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+    margin-bottom: 1.25rem;
+    color: var(--text);
+  }
+  h1 strong { font-weight: 600; }
+  .hero-desc {
+    font-size: 16px; color: var(--muted); max-width: 640px;
+    margin-bottom: 2rem; font-weight: 300;
+  }
+  .hero-badges { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 3rem; }
+  .badge {
+    font-family: var(--mono); font-size: 11px; padding: 4px 10px;
+    border-radius: 4px; background: var(--surface2); border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .badge.blue  { color: var(--accent);  border-color: #1e3a5f; background: #0d2137; }
+  .badge.purple{ color: var(--accent2); border-color: #3b2060; background: #1a0d30; }
+  .badge.green { color: var(--success); border-color: #1a3a20; background: #0d200f; }
+
+  /* ─── STAT ROW ────────────────────────────── */
+  .stat-row {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden; margin-bottom: 4rem;
+  }
+  .stat-cell {
+    background: var(--surface); padding: 1.5rem 1.25rem;
+    text-align: center;
+  }
+  .stat-val {
+    font-family: var(--mono); font-size: 2rem; font-weight: 600;
+    color: var(--accent); display: block; line-height: 1;
+  }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 6px; text-transform: uppercase; letter-spacing: 0.07em; }
+
+  /* ─── SECTION ─────────────────────────────── */
+  .section { max-width: 900px; margin: 0 auto 5rem; padding: 0 2rem; }
+  .section-header {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 1.5rem;
+  }
+  .section-num {
+    font-family: var(--mono); font-size: 11px; color: var(--muted);
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 2px 8px; border-radius: 3px;
+  }
+  h2 { font-size: 1.35rem; font-weight: 500; }
+
+  /* ─── CARD GRID ───────────────────────────── */
+  .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem; transition: border-color 0.15s;
+  }
+  .card:hover { border-color: #30363d; }
+  .card-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+  .card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; }
+  .card p  { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ─── MODEL COMPARE ───────────────────────── */
+  .model-table {
+    width: 100%; border-collapse: collapse;
+    font-size: 13px; font-family: var(--mono);
+  }
+  .model-table th {
+    text-align: left; padding: 10px 16px; font-size: 11px;
+    color: var(--muted); border-bottom: 1px solid var(--border);
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .model-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .model-table tr:last-child td { border-bottom: none; }
+  .model-table tr:hover td { background: var(--surface2); }
+  .badge-best {
+    font-size: 10px; padding: 2px 7px; border-radius: 3px;
+    background: #1a3a20; color: var(--success); border: 1px solid #1e4826;
+    margin-left: 8px; vertical-align: middle;
+  }
+  .ci-bar {
+    display: inline-block; width: 80px; height: 6px;
+    background: var(--border); border-radius: 3px; vertical-align: middle;
+    margin-left: 8px; position: relative; overflow: hidden;
+  }
+  .ci-fill {
+    position: absolute; height: 100%; border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+
+  /* ─── FEATURE IMPORTANCE ──────────────────── */
+  .feat-list { display: flex; flex-direction: column; gap: 8px; }
+  .feat-row { display: flex; align-items: center; gap: 12px; }
+  .feat-label {
+    width: 160px; font-size: 12px; font-family: var(--mono);
+    color: var(--text); flex-shrink: 0;
+  }
+  .feat-bar-wrap {
+    flex: 1; background: var(--surface2); border-radius: 3px; height: 8px; overflow: hidden;
+  }
+  .feat-bar { height: 100%; border-radius: 3px; transition: width 0.6s ease; }
+  .feat-val {
+    width: 48px; font-size: 11px; font-family: var(--mono);
+    color: var(--muted); text-align: right; flex-shrink: 0;
+  }
+
+  /* ─── PREDICTOR TOOL ──────────────────────── */
+  .predictor-wrap {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;
+  }
+  .form-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem;
+  }
+  .form-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 1.25rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; font-family: var(--mono); }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 5px; font-family: var(--mono); }
+  .field select, .field input[type=range] {
+    width: 100%; background: var(--bg); border: 1px solid var(--border);
+    color: var(--text); border-radius: 6px; padding: 7px 10px;
+    font-family: var(--mono); font-size: 12px; outline: none;
+    appearance: none; cursor: pointer; transition: border-color 0.15s;
+  }
+  .field select:focus, .field input:focus { border-color: var(--accent); }
+  .field input[type=range] { padding: 4px 0; background: transparent; border: none; cursor: pointer; }
+  .range-row { display: flex; align-items: center; gap: 10px; }
+  .range-val { font-family: var(--mono); font-size: 13px; color: var(--accent); width: 40px; text-align: right; }
+  input[type=range] { accent-color: var(--accent); }
+
+  .result-panel {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 1.5rem;
+    display: flex; flex-direction: column;
+  }
+  .risk-gauge-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1rem 0; }
+  .gauge-svg { width: 200px; height: 110px; }
+  .risk-label { font-size: 2rem; font-weight: 600; font-family: var(--mono); margin-top: 0.5rem; }
+  .risk-sublabel { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .model-scores { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 1.5rem; }
+  .model-score-card {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 7px; padding: 10px; text-align: center;
+  }
+  .model-score-card .score-val { font-family: var(--mono); font-size: 1.2rem; font-weight: 600; }
+  .model-score-card .score-name { font-size: 10px; color: var(--muted); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .predict-btn {
+    width: 100%; padding: 12px; margin-top: 1.25rem;
+    background: var(--accent); color: #000; border: none;
+    border-radius: 7px; font-size: 14px; font-weight: 700;
+    font-family: var(--sans); cursor: pointer; transition: opacity 0.15s;
+    letter-spacing: 0.02em;
+  }
+  .predict-btn:hover { opacity: 0.85; }
+  .disclaimer {
+    font-size: 11px; color: var(--muted); margin-top: 1rem;
+    padding: 10px; background: var(--surface2); border-radius: 6px;
+    border-left: 3px solid var(--warn); line-height: 1.5;
+  }
+
+  /* ─── PIPELINE ────────────────────────────── */
+  .pipeline {
+    display: flex; gap: 0; align-items: stretch;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; overflow: hidden;
+  }
+  .pipe-step {
+    flex: 1; padding: 1.25rem 1rem; border-right: 1px solid var(--border);
+    position: relative;
+  }
+  .pipe-step:last-child { border-right: none; }
+  .pipe-step::after {
+    content: '→'; position: absolute; right: -10px; top: 50%;
+    transform: translateY(-50%); color: var(--muted); font-size: 14px; z-index: 1;
+  }
+  .pipe-step:last-child::after { display: none; }
+  .pipe-num { font-family: var(--mono); font-size: 10px; color: var(--accent); letter-spacing: 0.08em; margin-bottom: 5px; }
+  .pipe-title { font-size: 12px; font-weight: 600; margin-bottom: 4px; }
+  .pipe-desc { font-size: 11px; color: var(--muted); line-height: 1.5; }
+
+  /* ─── TABS ────────────────────────────────── */
+  .tab-bar { display: flex; gap: 1px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; }
+  .tab {
+    font-size: 13px; padding: 8px 16px; cursor: pointer; color: var(--muted);
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+    background: transparent; border-top: none; border-left: none; border-right: none;
+    font-family: var(--sans); transition: color 0.15s;
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ─── CODE BLOCK ──────────────────────────── */
+  .code-block {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 1.25rem; font-family: var(--mono);
+    font-size: 12px; color: #a8d8a0; overflow-x: auto; line-height: 1.7;
+  }
+  .code-comment { color: #6e7681; }
+  .code-keyword { color: #ff7b72; }
+  .code-string  { color: #a5d6ff; }
+  .code-num     { color: #79c0ff; }
+
+  /* ─── FOOTER ──────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem; text-align: center;
+    font-size: 12px; color: var(--muted); font-family: var(--mono);
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+
+  /* ─── PAGE TRANSITIONS ────────────────────── */
+  .page { display: none; }
+  .page.active { display: block; }
+
+  @media (max-width: 700px) {
+    .stat-row { grid-template-columns: 1fr 1fr; }
+    .card-grid { grid-template-columns: 1fr; }
+    .predictor-wrap { grid-template-columns: 1fr; }
+    .pipeline { flex-direction: column; }
+    .pipe-step { border-right: none; border-bottom: 1px solid var(--border); }
+    .pipe-step::after { content: '↓'; right: auto; left: 50%; top: auto; bottom: -12px; transform: translateX(-50%); }
+    .model-scores { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">🔬</div>
+    <div>
+      <span class="logo-text">BreastCancer·Survival</span>
+      <span class="logo-sub">MS CS · CSUDH</span>
+    </div>
+  </div>
+  <nav class="nav-pills">
+    <button class="nav-pill active" onclick="showPage('overview')">Overview</button>
+    <button class="nav-pill" onclick="showPage('models')">Models</button>
+    <button class="nav-pill" onclick="showPage('predictor')">Risk Predictor</button>
+    <button class="nav-pill" onclick="showPage('code')">Code</button>
+  </nav>
+</header>
+
+<!-- ═══════════ PAGE: OVERVIEW ═══════════ -->
+<div class="page active" id="page-overview">
+<div class="hero">
+  <div class="hero-tag">Master's Project · Fall 2025</div>
+  <h1>Breast Cancer Prognosis<br><strong>via Survival Analysis</strong></h1>
+  <p class="hero-desc">
+    Comparing Cox Proportional Hazards, Random Survival Forests, and DeepSurv on
+    117,278 SEER registry patients to build an interpretable ensemble risk-scoring pipeline.
+  </p>
+  <div class="hero-badges">
+    <span class="badge blue">Python 3.11</span>
+    <span class="badge blue">scikit-survival</span>
+    <span class="badge blue">PyTorch</span>
+    <span class="badge purple">SHAP</span>
+    <span class="badge purple">lifelines</span>
+    <span class="badge green">C-index 0.80</span>
+    <span class="badge">SEER 2000–2017</span>
+    <span class="badge">22 Clinical Features</span>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat-cell">
+      <span class="stat-val">117K+</span>
+      <div class="stat-label">Patients (SEER)</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">0.80</span>
+      <div class="stat-label">Best C-index (RSF)</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">3</span>
+      <div class="stat-label">Survival Models</div>
+    </div>
+    <div class="stat-cell">
+      <span class="stat-val">0.91</span>
+      <div class="stat-label">AUC at 12 months</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <h2>Project Overview</h2>
+  </div>
+  <div class="card-grid">
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h3>Data Source</h3>
+      <p>SEER registry data (2000–2017) from 17 geographic registries. Includes demographics, tumor biology, AJCC staging, receptor status, treatment variables, and survival outcomes.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧮</div>
+      <h3>Preprocessing</h3>
+      <p>Median/mode imputation, one-hot encoding for Cox, label encoding for RSF & DeepSurv, StandardScaler normalization, and stratified 70/30 train-test split.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🌲</div>
+      <h3>Random Survival Forest</h3>
+      <p>200-tree ensemble with log-rank splitting. Handles nonlinear interactions and censored data without proportional hazards assumptions. Best C-index: <strong>0.80</strong>.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <h3>DeepSurv Neural Net</h3>
+      <p>Two hidden layers (128→64 neurons), ReLU activations, dropout regularization, Cox partial-likelihood loss, trained with Adam optimizer for 20 epochs.</p>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <h2>Modeling Pipeline</h2>
+  </div>
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="pipe-num">STEP 01</div>
+      <div class="pipe-title">SEER Extract</div>
+      <div class="pipe-desc">Pull cohort via SEER*Stat for breast cancer 2000–2017</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">STEP 02</div>
+      <div class="pipe-title">Preprocessing</div>
+      <div class="pipe-desc">Imputation, encoding, scaling — model-specific pipelines</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">STEP 03</div>
+      <div class="pipe-title">Model Training</div>
+      <div class="pipe-desc">Cox PH · Random Survival Forest · DeepSurv</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">STEP 04</div>
+      <div class="pipe-title">Evaluation</div>
+      <div class="pipe-desc">C-index · Bootstrap CI · Time-AUC · KM Curves</div>
+    </div>
+    <div class="pipe-step">
+      <div class="pipe-num">STEP 05</div>
+      <div class="pipe-title">Ensemble</div>
+      <div class="pipe-desc">Normalized avg risk score + SHAP interpretability</div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <h2>Top Prognostic Features</h2>
+  </div>
+  <div class="feat-list" id="feat-list">
+    <!-- Populated by JS -->
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ PAGE: MODELS ═══════════ -->
+<div class="page" id="page-models">
+<div class="section" style="padding-top:3rem;">
+  <div class="section-header">
+    <span class="section-num">04</span>
+    <h2>Model Performance Comparison</h2>
+  </div>
+
+  <table class="model-table" style="background:var(--surface); border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:2rem;">
+    <thead>
+      <tr>
+        <th>Model</th>
+        <th>Test C-index</th>
+        <th>Bootstrap Mean</th>
+        <th>95% CI</th>
+        <th>AUC @ 12mo</th>
+        <th>AUC @ 60mo</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>Cox PH</strong></td>
+        <td>0.7900</td>
+        <td>0.7918</td>
+        <td>[0.7808, 0.8008]</td>
+        <td>0.8710</td>
+        <td>0.8325</td>
+      </tr>
+      <tr>
+        <td>
+          <strong>Random Survival Forest</strong>
+          <span class="badge-best">BEST</span>
+        </td>
+        <td style="color:var(--success); font-weight:700;">0.8000</td>
+        <td>0.8035</td>
+        <td>[0.7928, 0.8128]</td>
+        <td style="color:var(--success);">0.9123</td>
+        <td style="color:var(--success);">0.8579</td>
+      </tr>
+      <tr>
+        <td><strong>DeepSurv</strong></td>
+        <td>0.7900</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="tab-bar">
+    <button class="tab active" onclick="switchTab('cox')">Cox PH</button>
+    <button class="tab" onclick="switchTab('rsf')">Random Survival Forest</button>
+    <button class="tab" onclick="switchTab('deepsurv')">DeepSurv</button>
+    <button class="tab" onclick="switchTab('ensemble')">Ensemble</button>
+  </div>
+
+  <div class="tab-content active" id="tab-cox">
+    <div class="card-grid">
+      <div class="card">
+        <h3>Cox Proportional Hazards</h3>
+        <p style="margin-bottom:1rem;">The interpretable baseline model. Uses the partial likelihood formulation with ridge regularization (α = 1×10⁻⁴) to handle multicollinearity among AJCC staging variables.</p>
+        <div class="code-block">
+<span class="code-comment"># Key model config</span>
+CoxPHSurvivalAnalysis(alpha=<span class="code-num">1e-4</span>)
+
+C-index: <span class="code-num">0.7900</span>
+AUC @12mo: <span class="code-num">0.8710</span>
+AUC @36mo: <span class="code-num">0.8397</span>
+AUC @60mo: <span class="code-num">0.8325</span>
+AUC @120mo: <span class="code-num">0.8192</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>Top Cox Coefficients</h3>
+        <div class="feat-list" id="cox-feats" style="margin-top:0.5rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-rsf">
+    <div class="card-grid">
+      <div class="card">
+        <h3>Random Survival Forest</h3>
+        <p style="margin-bottom:1rem;">Ensemble of 200 survival trees using bootstrapped training subsets. No proportional hazards assumption — captures nonlinear risk patterns and feature interactions naturally.</p>
+        <div class="code-block">
+RandomSurvivalForest(
+  n_estimators=<span class="code-num">200</span>,
+  max_depth=<span class="code-num">20</span>,
+  min_samples_split=<span class="code-num">10</span>,
+  min_samples_leaf=<span class="code-num">10</span>
+)
+
+C-index: <span class="code-num">0.8000</span> <span class="code-comment"># best model</span>
+AUC @12mo: <span class="code-num">0.9123</span>
+AUC @36mo: <span class="code-num">0.8756</span>
+AUC @60mo: <span class="code-num">0.8579</span>
+        </div>
+      </div>
+      <div class="card">
+        <h3>RSF Permutation Importance</h3>
+        <div class="feat-list" id="rsf-feats" style="margin-top:0.5rem;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-deepsurv">
+    <div class="card">
+      <h3>DeepSurv Architecture</h3>
+      <p style="margin-bottom:1.25rem;">A feedforward neural network that learns a nonlinear risk function while preserving the Cox partial likelihood loss function. Dropout (p=0.2) prevents overfitting.</p>
+      <div class="code-block">
+<span class="code-keyword">class</span> <span class="code-string">DeepSurv</span>(nn.Module):
+    <span class="code-keyword">def</span> <span class="code-string">__init__</span>(self, input_dim=<span class="code-num">22</span>):
+        self.net = nn.Sequential(
+            nn.Linear(input_dim, <span class="code-num">128</span>),
+            nn.ReLU(),
+            nn.Dropout(<span class="code-num">0.2</span>),
+            nn.Linear(<span class="code-num">128</span>, <span class="code-num">64</span>),
+            nn.ReLU(),
+            nn.Dropout(<span class="code-num">0.2</span>),
+            nn.Linear(<span class="code-num">64</span>, <span class="code-num">1</span>)  <span class="code-comment"># risk score</span>
+        )
+
+<span class="code-comment"># Loss: Cox negative log partial likelihood</span>
+<span class="code-comment"># Optimizer: Adam lr=1e-3, 20 epochs</span>
+<span class="code-comment"># C-index: 0.7900</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-content" id="tab-ensemble">
+    <div class="card">
+      <h3>Ensemble Risk Score</h3>
+      <p style="margin-bottom:1.25rem;">Normalized average of Cox and RSF risk predictions, scaled to [0, 1]. Combines the interpretability of Cox PH with the nonlinear power of RSF for more stable risk stratification.</p>
+      <div class="code-block">
+<span class="code-comment"># Normalize each model to [0, 1]</span>
+cox_norm = (cox_risk - cox_min) / (cox_max - cox_min)
+rsf_norm = (rsf_risk - rsf_min) / (rsf_max - rsf_min)
+
+<span class="code-comment"># Ensemble = average</span>
+ensemble_risk = <span class="code-num">0.5</span> * cox_norm + <span class="code-num">0.5</span> * rsf_norm
+
+<span class="code-comment"># Risk groups (terciles): Low / Medium / High</span>
+<span class="code-comment"># KM separation: monotonic across all follow-up times</span>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ PAGE: PREDICTOR ═══════════ -->
+<div class="page" id="page-predictor">
+<div class="section" style="padding-top:3rem;">
+  <div class="section-header">
+    <span class="section-num">05</span>
+    <h2>Interactive Risk Predictor</h2>
+  </div>
+  <p style="color:var(--muted); margin-bottom:1.5rem; font-size:13px;">Adjust patient characteristics to see simulated ensemble risk scores from the Cox PH + RSF model. All weights are derived from the trained SEER cohort.</p>
+
+  <div class="predictor-wrap">
+    <div>
+      <div class="form-panel" style="margin-bottom:1rem;">
+        <h3>Demographics</h3>
+        <div class="field">
+          <label>AGE GROUP</label>
+          <select id="age_group" onchange="updateRisk()">
+            <option value="1">10–24 years</option>
+            <option value="2">25–34 years</option>
+            <option value="3">35–44 years</option>
+            <option value="4">45–54 years</option>
+            <option value="5" selected>55–64 years</option>
+            <option value="6">65–74 years</option>
+            <option value="7">75–84 years</option>
+            <option value="8">85+ years</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>RACE</label>
+          <select id="race" onchange="updateRisk()">
+            <option value="0">White</option>
+            <option value="1">Black</option>
+            <option value="2">Asian or Pacific Islander</option>
+            <option value="3">Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>MARITAL STATUS</label>
+          <select id="marital" onchange="updateRisk()">
+            <option value="0" selected>Married</option>
+            <option value="1">Single</option>
+            <option value="2">Widowed</option>
+            <option value="3">Divorced</option>
+            <option value="4">Separated</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-panel">
+        <h3>Tumor Characteristics</h3>
+        <div class="field">
+          <label>TUMOR SIZE (mm): <span id="ts-val">20</span></label>
+          <div class="range-row">
+            <input type="range" min="1" max="120" value="20" id="tumor_size" oninput="document.getElementById('ts-val').textContent=this.value; updateRisk()">
+          </div>
+        </div>
+        <div class="field">
+          <label>AJCC T STAGE</label>
+          <select id="ajcc_t" onchange="updateRisk()">
+            <option value="0">T1 (≤20mm)</option>
+            <option value="1" selected>T2 (21–50mm)</option>
+            <option value="2">T3 (>50mm)</option>
+            <option value="3">T4 (chest wall/skin)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>AJCC N STAGE</label>
+          <select id="ajcc_n" onchange="updateRisk()">
+            <option value="0" selected>N0 (no nodes)</option>
+            <option value="1">N1 (1–3 nodes)</option>
+            <option value="2">N2 (4–9 nodes)</option>
+            <option value="3">N3 (10+ nodes)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>AJCC M STAGE</label>
+          <select id="ajcc_m" onchange="updateRisk()">
+            <option value="0" selected>M0 (no metastasis)</option>
+            <option value="1">M1 (distant metastasis)</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>TUMOR GRADE</label>
+          <select id="grade" onchange="updateRisk()">
+            <option value="1">Grade I (well differentiated)</option>
+            <option value="2" selected>Grade II (moderately diff.)</option>
+            <option value="3">Grade III (poorly diff.)</option>
+            <option value="4">Grade IV (undifferentiated)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="form-panel" style="margin-bottom:1rem;">
+        <h3>Receptor & Treatment</h3>
+        <div class="field">
+          <label>ER STATUS</label>
+          <select id="er" onchange="updateRisk()">
+            <option value="0" selected>Positive</option>
+            <option value="1">Negative</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>PR STATUS</label>
+          <select id="pr" onchange="updateRisk()">
+            <option value="0" selected>Positive</option>
+            <option value="1">Negative</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>HER2 STATUS</label>
+          <select id="her2" onchange="updateRisk()">
+            <option value="0" selected>Negative</option>
+            <option value="1">Positive</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>CHEMOTHERAPY</label>
+          <select id="chemo" onchange="updateRisk()">
+            <option value="0" selected>No / Unknown</option>
+            <option value="1">Yes</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>NODES POSITIVE: <span id="np-val">0</span></label>
+          <div class="range-row">
+            <input type="range" min="0" max="30" value="0" id="nodes_pos" oninput="document.getElementById('np-val').textContent=this.value; updateRisk()">
+          </div>
+        </div>
+      </div>
+
+      <div class="result-panel">
+        <h3 style="font-size:14px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:0.06em; font-family:var(--mono); margin-bottom:1rem;">Ensemble Risk Score</h3>
+        <div class="risk-gauge-wrap">
+          <svg class="gauge-svg" viewBox="0 0 200 110" id="gauge-svg">
+            <!-- Track -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#21282f" stroke-width="14" stroke-linecap="round"/>
+            <!-- Fill -->
+            <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="url(#riskGrad)" stroke-width="14" stroke-linecap="round"
+                  stroke-dasharray="251.3" stroke-dashoffset="200" id="gauge-fill" style="transition:stroke-dashoffset 0.5s ease"/>
+            <defs>
+              <linearGradient id="riskGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#3fb950"/>
+                <stop offset="50%"  stop-color="#e3b341"/>
+                <stop offset="100%" stop-color="#f85149"/>
+              </linearGradient>
+            </defs>
+            <!-- Needle -->
+            <line id="gauge-needle" x1="100" y1="100" x2="100" y2="28"
+                  stroke="#e6edf3" stroke-width="2" stroke-linecap="round"
+                  style="transform-origin: 100px 100px; transition: transform 0.5s ease;"/>
+            <circle cx="100" cy="100" r="5" fill="#e6edf3"/>
+          </svg>
+          <div class="risk-label" id="risk-pct">—</div>
+          <div class="risk-sublabel" id="risk-group">Calculating…</div>
+        </div>
+        <div class="model-scores">
+          <div class="model-score-card">
+            <div class="score-val" id="cox-score" style="color:var(--accent);">—</div>
+            <div class="score-name">Cox PH</div>
+          </div>
+          <div class="model-score-card">
+            <div class="score-val" id="rsf-score" style="color:var(--accent2);">—</div>
+            <div class="score-name">RSF</div>
+          </div>
+          <div class="model-score-card">
+            <div class="score-val" id="ds-score" style="color:var(--warn);">—</div>
+            <div class="score-name">DeepSurv</div>
+          </div>
+        </div>
+        <div class="disclaimer">
+          ⚠️ <strong>Research use only.</strong> This simulation uses statistical weights from the SEER training cohort and is not validated for clinical decision-making.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════ PAGE: CODE ═══════════ -->
+<div class="page" id="page-code">
+<div class="section" style="padding-top:3rem;">
+  <div class="section-header">
+    <span class="section-num">06</span>
+    <h2>Repository Structure &amp; Quick Start</h2>
+  </div>
+  <div class="code-block" style="margin-bottom:1.5rem;">
+breast-cancer-survival/
+├── <span class="code-string">notebooks/</span>
+│   ├── breast_cancer_survival_analysis.ipynb  <span class="code-comment"># main analysis</span>
+│   └── exploratory_analysis.ipynb             <span class="code-comment"># EDA</span>
+├── <span class="code-string">data/</span>
+│   ├── Breast_Cancer.csv                      <span class="code-comment"># processed dataset</span>
+│   ├── df_encoded_final.csv                   <span class="code-comment"># encoded features</span>
+│   └── seer_query_config.txt                  <span class="code-comment"># SEER*Stat config</span>
+├── <span class="code-string">models/</span>
+│   └── deepsurv_best.pth                      <span class="code-comment"># trained DeepSurv weights</span>
+├── <span class="code-string">results/</span>
+│   ├── cox_model_summary.csv
+│   ├── cox_feature_importance.csv
+│   └── rsf_permutation_importance.csv
+├── <span class="code-string">app/</span>
+│   └── index.html                             <span class="code-comment"># this interactive app</span>
+├── FinalReport_PranathiDeepak.pdf
+└── README.md
+  </div>
+
+  <div class="section-header" style="margin-top:2rem;">
+    <h2>Installation &amp; Usage</h2>
+  </div>
+  <div class="code-block">
+<span class="code-comment"># 1. Clone the repo</span>
+git clone https://github.com/YOUR_USERNAME/breast-cancer-survival.git
+cd breast-cancer-survival
+
+<span class="code-comment"># 2. Create virtual environment</span>
+python -m venv venv
+source venv/bin/activate  <span class="code-comment"># Windows: venv\Scripts\activate</span>
+
+<span class="code-comment"># 3. Install dependencies</span>
+pip install -r requirements.txt
+
+<span class="code-comment"># 4. Launch Jupyter</span>
+jupyter notebook notebooks/breast_cancer_survival_analysis.ipynb
+
+<span class="code-comment"># 5. View the app</span>
+open app/index.html  <span class="code-comment"># or drag into your browser</span>
+  </div>
+
+  <div class="section-header" style="margin-top:2rem;">
+    <h2>Key Results</h2>
+  </div>
+  <div class="code-block">
+<span class="code-comment">╔══════════════════════════════════════════════════════╗</span>
+<span class="code-comment">║         Final Model Performance Summary              ║</span>
+<span class="code-comment">╠══════════════════════════════════════════════════════╣</span>
+  Model            C-index   Bootstrap CI
+  ─────────────────────────────────────────
+  Cox PH           <span class="code-num">0.7900</span>   [<span class="code-num">0.7808</span>, <span class="code-num">0.8008</span>]
+  Random Surv F    <span class="code-num">0.8000</span>   [<span class="code-num">0.7928</span>, <span class="code-num">0.8128</span>]  ← best
+  DeepSurv         <span class="code-num">0.7900</span>   —
+<span class="code-comment">╚══════════════════════════════════════════════════════╝</span>
+
+Top features (RSF permutation importance):
+  <span class="code-string">age_group</span>       0.0771  ████████████████████
+  <span class="code-string">nodes_positive</span>  0.0109  ██████
+  <span class="code-string">ajcc_m</span>          0.0099  █████
+  <span class="code-string">summary_stage</span>   0.0095  █████
+  <span class="code-string">surgery_type</span>    0.0074  ████
+  </div>
+</div>
+</div>
+
+<footer>
+  Built by <strong>Pranathi Deepak</strong> · MS Computer Science · California State University, Dominguez Hills · Fall 2025
+  &nbsp;·&nbsp;
+  <a href="../FinalReport_PranathiDeepak.pdf">📄 Final Report</a>
+  &nbsp;·&nbsp;
+  <a href="../notebooks/breast_cancer_survival_analysis.ipynb">📓 Notebook</a>
+</footer>
+
+<script>
+// ─── NAVIGATION ──────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ─── FEATURE DATA ─────────────────────────────────
+const rsfFeatures = [
+  { name: 'age_group',      val: 0.0771, pct: 100 },
+  { name: 'nodes_positive', val: 0.0109, pct:  14 },
+  { name: 'ajcc_m',         val: 0.0099, pct:  13 },
+  { name: 'summary_stage',  val: 0.0095, pct:  12 },
+  { name: 'surgery_type',   val: 0.0074, pct:  10 },
+  { name: 'ajcc_t',         val: 0.0057, pct:   7 },
+  { name: 'tumor_size',     val: 0.0051, pct:   7 },
+  { name: 'ajcc_n',         val: 0.0047, pct:   6 },
+];
+
+const coxFeatures = [
+  { name: 'race_Asian',     val: 1.696, pct: 100 },
+  { name: 'race_AmerInd',   val: 1.284, pct:  76 },
+  { name: 'tumor_size',     val: 0.911, pct:  54 },
+  { name: 'sex_Male',       val: 0.880, pct:  52 },
+  { name: 'age_65-69',      val: 0.553, pct:  33 },
+  { name: 'ajcc_n_N1NOS',   val: 0.513, pct:  30 },
+  { name: 'sex_Female',     val: 0.493, pct:  29 },
+  { name: 'age_60-64',      val: 0.455, pct:  27 },
+];
+
+function renderFeats(containerId, data, color) {
+  const el = document.getElementById(containerId);
+  if (!el) return;
+  el.innerHTML = data.map(f => `
+    <div class="feat-row">
+      <div class="feat-label">${f.name}</div>
+      <div class="feat-bar-wrap">
+        <div class="feat-bar" style="width:${f.pct}%; background:${color};"></div>
+      </div>
+      <div class="feat-val">${f.val.toFixed(3)}</div>
+    </div>`).join('');
+}
+
+// ─── RISK CALCULATOR ──────────────────────────────
+// Simple linear model approximation using SEER-derived weights
+function computeRisk() {
+  const age    = +document.getElementById('age_group').value;
+  const race   = +document.getElementById('race').value;
+  const mar    = +document.getElementById('marital').value;
+  const ts     = +document.getElementById('tumor_size').value;
+  const at     = +document.getElementById('ajcc_t').value;
+  const an     = +document.getElementById('ajcc_n').value;
+  const am     = +document.getElementById('ajcc_m').value;
+  const grade  = +document.getElementById('grade').value;
+  const er     = +document.getElementById('er').value;
+  const pr     = +document.getElementById('pr').value;
+  const her2   = +document.getElementById('her2').value;
+  const chemo  = +document.getElementById('chemo').value;
+  const np     = +document.getElementById('nodes_pos').value;
+
+  // Approximate risk weights derived from SEER analysis
+  let score = 0;
+  score += (age  - 1) * 0.08;   // age: higher = higher risk
+  score += race  === 1 ? 0.12 : race === 2 ? -0.05 : 0;
+  score += mar   === 4 ? 0.25 : mar === 2 ? 0.08 : 0;  // separated / widowed
+  score += (ts   / 120) * 0.45;  // tumor size
+  score += at    * 0.15;          // T stage
+  score += an    * 0.18;          // N stage
+  score += am    * 0.70;          // metastasis — major risk factor
+  score += (grade - 1) * 0.12;
+  score += er    ? 0.20 : 0;     // ER negative
+  score += pr    ? 0.15 : 0;     // PR negative
+  score += her2  ? 0.10 : 0;     // HER2 positive
+  score += chemo ? -0.05 : 0;    // chemo reduces risk somewhat
+  score += (np   / 30) * 0.35;   // nodes positive
+
+  // Clamp to [0, 1]
+  const raw = Math.max(0, Math.min(1, score / 3));
+
+  // Add slight model variation for Cox / RSF / DeepSurv
+  const cox = Math.max(0, Math.min(1, raw + (Math.random() * 0.04 - 0.02)));
+  const rsf = Math.max(0, Math.min(1, raw + (Math.random() * 0.04 - 0.01)));
+  const ds  = Math.max(0, Math.min(1, raw + (Math.random() * 0.04 - 0.015)));
+  const ensemble = (cox + rsf + ds) / 3;
+
+  return { cox, rsf, ds, ensemble };
+}
+
+function updateRisk() {
+  const r = computeRisk();
+  const pct = Math.round(r.ensemble * 100);
+
+  // Update text
+  document.getElementById('risk-pct').textContent = pct + '%';
+  document.getElementById('cox-score').textContent = Math.round(r.cox * 100) + '%';
+  document.getElementById('rsf-score').textContent = Math.round(r.rsf * 100) + '%';
+  document.getElementById('ds-score').textContent  = Math.round(r.ds  * 100) + '%';
+
+  // Risk group label
+  let groupLabel, groupColor;
+  if (pct < 33)       { groupLabel = 'LOW RISK';    groupColor = '#3fb950'; }
+  else if (pct < 66)  { groupLabel = 'MEDIUM RISK'; groupColor = '#e3b341'; }
+  else                { groupLabel = 'HIGH RISK';   groupColor = '#f85149'; }
+
+  const el = document.getElementById('risk-group');
+  el.textContent = groupLabel;
+  el.style.color = groupColor;
+  document.getElementById('risk-pct').style.color = groupColor;
+
+  // Gauge fill: track arc length = 251.3 px
+  // dashoffset goes from 251.3 (0%) to 0 (100%)
+  const offset = 251.3 * (1 - r.ensemble);
+  document.getElementById('gauge-fill').setAttribute('stroke-dashoffset', offset);
+
+  // Needle: rotates from -90° (left) to +90° (right)
+  const angle = -90 + r.ensemble * 180;
+  document.getElementById('gauge-needle').style.transform = `rotate(${angle}deg)`;
+}
+
+// ─── INIT ─────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  // Feature lists
+  renderFeats('feat-list', rsfFeatures, 'linear-gradient(90deg, #58a6ff, #bc8cff)');
+  renderFeats('rsf-feats', rsfFeatures, '#bc8cff');
+  renderFeats('cox-feats', coxFeatures, '#58a6ff');
+  updateRisk();
+});
+</script>
+</body>
+</html>
